@@ -1,3 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * gpong/gpong.c
+ * 
+ * Pong port to Goldspace.
+ *
+ * Copyright (C) Goldside543
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
