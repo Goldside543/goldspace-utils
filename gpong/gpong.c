@@ -40,8 +40,8 @@ void clear_screen() {
 }
 
 void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
-    clear_screen();
     char screen[WIDTH][HEIGHT];
+    // Initialize screen with empty characters
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
             screen[x][y] = EMPTY_CHAR;
@@ -67,6 +67,7 @@ void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
     }
 
     // Print screen
+    clear_screen(); // Clear the previous frame
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             printf("%c", screen[x][y]);
@@ -146,9 +147,9 @@ int main() {
     Paddle right_paddle = {{WIDTH - 3, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
 
     while (1) {
-        draw_frame(&ball, &left_paddle, &right_paddle);
         update_game(&ball, &left_paddle, &right_paddle);
-        usleep(50000); // Sleep for 50 ms
+        draw_frame(&ball, &left_paddle, &right_paddle);
+        usleep(150000); // Sleep for 150 ms
     }
 
     return 0;
