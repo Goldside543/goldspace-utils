@@ -1,3 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * gcalc/gcalc.c
+ * 
+ * Simple calculator for Goldspace.
+ *
+ * Copyright (C) Goldside543
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
