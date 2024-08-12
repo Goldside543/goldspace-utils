@@ -35,6 +35,11 @@ typedef struct {
     int height;
 } Paddle;
 
+typedef enum {
+    SINGLE_PLAYER,
+    MULTIPLAYER
+} GameMode;
+
 void clear_screen() {
     printf("\033[H\033[J");
 }
@@ -76,21 +81,40 @@ void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
     }
 }
 
-void draw_title_screen() {
+void draw_title_screen(GameMode *mode) {
     clear_screen();
     printf("************************************************\n");
     printf("*                                              *\n");
-    printf("*                     GPONG                    *\n");
+    printf("*                      GPONG                   *\n");
     printf("*                                              *\n");
-    printf("*         Use 'W' and 'S' to move the left     *\n");
-    printf("*        paddle. Use 'I' and 'K' to move the   *\n");
-    printf("*         right paddle. Press ENTER to start.  *\n");
+    printf("*        1. Single Player                      *\n");
+    printf("*        2. Multiplayer                        *\n");
     printf("*                                              *\n");
+    printf("*        Single Player Controls:               *\n");
+    printf("*        Player 1: Move Paddle Up: 'w'         *\n");
+    printf("*                   Move Paddle Down: 's'      *\n");
+    printf("*                                              *\n");
+    printf("*        Multiplayer Controls:                 *\n");
+    printf("*        Player 1: Move Paddle Up: 'w'         *\n");
+    printf("*                   Move Paddle Down: 's'      *\n");
+    printf("*        Player 2: Move Paddle Up: 'i'         *\n");
+    printf("*                   Move Paddle Down: 'k'      *\n");
+    printf("*                                              *\n");
+    printf("*        Press 1 for Single Player             *\n");
+    printf("*        Press 2 for Multiplayer               *\n");
     printf("************************************************\n");
 
-    // Wait for user input to start the game
-    while (getchar() != '\n') {
-        // Wait for ENTER key
+    // Wait for user input to select the game mode
+    char c;
+    while (1) {
+        c = getchar();
+        if (c == '1') {
+            *mode = SINGLE_PLAYER;
+            break;
+        } else if (c == '2') {
+            *mode = MULTIPLAYER;
+            break;
+        }
     }
 }
 
@@ -114,7 +138,7 @@ int kbhit() {
     return 0;
 }
 
-void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
+void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, GameMode mode) {
     ball->pos.x += ball->dir.x;
     ball->pos.y += ball->dir.y;
 
@@ -147,13 +171,32 @@ void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
     // Move paddles
     if (kbhit()) {
         char c = getchar();
-        if (c == 'w' && left_paddle->pos.y > 0) {
-            left_paddle->pos.y--;
-        } else if (c == 's' && left_paddle->pos.y < HEIGHT - left_paddle->height) {
-            left_paddle->pos.y++;
-        } else if (c == 'i' && right_paddle->pos.y > 0) {
+        if (mode == MULTIPLAYER) {
+            // Player controls for both paddles in Multiplayer mode
+            if (c == 'w' && left_paddle->pos.y > 0) {
+                left_paddle->pos.y--;
+            } else if (c == 's' && left_paddle->pos.y < HEIGHT - left_paddle->height) {
+                left_paddle->pos.y++;
+            } else if (c == 'i' && right_paddle->pos.y > 0) {
+                right_paddle->pos.y--;
+            } else if (c == 'k' && right_paddle->pos.y < HEIGHT - right_paddle->height) {
+                right_paddle->pos.y++;
+            }
+        } else if (mode == SINGLE_PLAYER) {
+            // Player controls for left paddle in Single Player mode
+            if (c == 'w' && left_paddle->pos.y > 0) {
+                left_paddle->pos.y--;
+            } else if (c == 's' && left_paddle->pos.y < HEIGHT - left_paddle->height) {
+                left_paddle->pos.y++;
+            }
+        }
+    }
+
+    // AI for right paddle in Single Player mode
+    if (mode == SINGLE_PLAYER) {
+        if (ball->pos.y < right_paddle->pos.y) {
             right_paddle->pos.y--;
-        } else if (c == 'k' && right_paddle->pos.y < HEIGHT - right_paddle->height) {
+        } else if (ball->pos.y > right_paddle->pos.y + right_paddle->height - 1) {
             right_paddle->pos.y++;
         }
     }
@@ -163,15 +206,16 @@ int main() {
     Ball ball = {{WIDTH / 2, HEIGHT / 2}, {1, 1}};
     Paddle left_paddle = {{2, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
     Paddle right_paddle = {{WIDTH - 3, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
+    GameMode mode;
 
-    // Show the title screen
-    draw_title_screen();
+    // Show the title screen and get the game mode
+    draw_title_screen(&mode);
 
     // Main game loop
     while (1) {
-        update_game(&ball, &left_paddle, &right_paddle);
+        update_game(&ball, &left_paddle, &right_paddle, mode);
         draw_frame(&ball, &left_paddle, &right_paddle);
-        usleep(100000); // Sleep for 100 ms
+        usleep(100000); // Sleep for 100 ms 
     }
 
     return 0;
