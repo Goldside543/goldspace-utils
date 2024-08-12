@@ -20,6 +20,7 @@
 #define BALL_CHAR 'O'
 #define PADDLE_CHAR '|'
 #define EMPTY_CHAR ' '
+#define WINNING_SCORE 10
 
 typedef struct {
     int x, y;
@@ -44,7 +45,7 @@ void clear_screen() {
     printf("\033[H\033[J");
 }
 
-void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
+void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, int left_score, int right_score) {
     char screen[WIDTH][HEIGHT];
     // Initialize screen with empty characters
     for (int x = 0; x < WIDTH; x++) {
@@ -71,8 +72,9 @@ void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
         screen[ball->pos.x][ball->pos.y] = BALL_CHAR;
     }
 
-    // Print screen
+    // Draw scoreboard
     clear_screen(); // Clear the previous frame
+    printf("Scoreboard: Player 1: %d  |  Player 2: %d\n", left_score, right_score);
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             printf("%c", screen[x][y]);
@@ -138,7 +140,7 @@ int kbhit() {
     return 0;
 }
 
-void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, GameMode mode) {
+void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, GameMode mode, int *left_score, int *right_score) {
     ball->pos.x += ball->dir.x;
     ball->pos.y += ball->dir.y;
 
@@ -161,7 +163,24 @@ void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, GameMode
     }
 
     // Ball out of bounds
-    if (ball->pos.x <= 0 || ball->pos.x >= WIDTH - 1) {
+    if (ball->pos.x <= 0) {
+        (*right_score)++;
+        if (*right_score >= WINNING_SCORE) {
+            clear_screen();
+            printf("Player 2 Wins!\n");
+            exit(0);
+        }
+        ball->pos.x = WIDTH / 2;
+        ball->pos.y = HEIGHT / 2;
+        ball->dir.x = (rand() % 2) ? 1 : -1;
+        ball->dir.y = (rand() % 2) ? 1 : -1;
+    } else if (ball->pos.x >= WIDTH - 1) {
+        (*left_score)++;
+        if (*left_score >= WINNING_SCORE) {
+            clear_screen();
+            printf("Player 1 Wins!\n");
+            exit(0);
+        }
         ball->pos.x = WIDTH / 2;
         ball->pos.y = HEIGHT / 2;
         ball->dir.x = (rand() % 2) ? 1 : -1;
@@ -207,15 +226,17 @@ int main() {
     Paddle left_paddle = {{2, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
     Paddle right_paddle = {{WIDTH - 3, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
     GameMode mode;
+    int left_score = 0;
+    int right_score = 0;
 
     // Show the title screen and get the game mode
     draw_title_screen(&mode);
 
     // Main game loop
     while (1) {
-        update_game(&ball, &left_paddle, &right_paddle, mode);
-        draw_frame(&ball, &left_paddle, &right_paddle);
-        usleep(100000); // Sleep for 100 ms 
+        update_game(&ball, &left_paddle, &right_paddle, mode, &left_score, &right_score);
+        draw_frame(&ball, &left_paddle, &right_paddle, left_score, right_score);
+        usleep(100000); // Sleep for 100 ms
     }
 
     return 0;
