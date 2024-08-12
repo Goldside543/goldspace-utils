@@ -2,7 +2,7 @@
 /*
  * gpong/gpong.c
  * 
- * Pong port to Goldspace.
+ * Pong, ported to Goldspace.
  *
  * Copyright (C) Goldside543
  *
