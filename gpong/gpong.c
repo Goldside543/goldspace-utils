@@ -263,7 +263,7 @@ int main() {
     while (1) {
         update_game(&ball, &left_paddle, &right_paddle, mode, &left_score, &right_score);
         draw_frame(&ball, &left_paddle, &right_paddle, left_score, right_score);
-        usleep(100000); // Sleep for 100 ms
+        usleep(50000); // Sleep for 50 ms
     }
 
     return 0;
