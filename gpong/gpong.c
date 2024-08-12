@@ -76,6 +76,24 @@ void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle) {
     }
 }
 
+void draw_title_screen() {
+    clear_screen();
+    printf("************************************************\n");
+    printf("*                                              *\n");
+    printf("*                     GPONG                    *\n");
+    printf("*                                              *\n");
+    printf("*         Use 'W' and 'S' to move the left     *\n");
+    printf("*        paddle. Use 'I' and 'K' to move the   *\n");
+    printf("*         right paddle. Press ENTER to start.  *\n");
+    printf("*                                              *\n");
+    printf("************************************************\n");
+
+    // Wait for user input to start the game
+    while (getchar() != '\n') {
+        // Wait for ENTER key
+    }
+}
+
 int kbhit() {
     struct termios oldt, newt;
     int ch;
@@ -146,10 +164,14 @@ int main() {
     Paddle left_paddle = {{2, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
     Paddle right_paddle = {{WIDTH - 3, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
 
+    // Show the title screen
+    draw_title_screen();
+
+    // Main game loop
     while (1) {
         update_game(&ball, &left_paddle, &right_paddle);
         draw_frame(&ball, &left_paddle, &right_paddle);
-        usleep(150000); // Sleep for 150 ms
+        usleep(100000); // Sleep for 100 ms (adjust as needed)
     }
 
     return 0;
