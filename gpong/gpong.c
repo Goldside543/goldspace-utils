@@ -171,7 +171,7 @@ int main() {
     while (1) {
         update_game(&ball, &left_paddle, &right_paddle);
         draw_frame(&ball, &left_paddle, &right_paddle);
-        usleep(100000); // Sleep for 100 ms (adjust as needed)
+        usleep(100000); // Sleep for 100 ms
     }
 
     return 0;
