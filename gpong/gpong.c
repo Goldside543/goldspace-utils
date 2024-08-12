@@ -14,14 +14,16 @@
 #include <termios.h>
 #include <fcntl.h>
 
-#define WIDTH 40
-#define HEIGHT 20
-#define PADDLE_HEIGHT 4
+#define WIDTH 80
+#define HEIGHT 24
+#define PADDLE_HEIGHT 5
 #define BALL_CHAR 'O'
 #define PADDLE_CHAR '|'
 #define EMPTY_CHAR ' '
 #define WINNING_SCORE 10
+#define CENTER_LINE_CHAR '|'
 
+// Structures for Ball, Paddle, and Game Mode
 typedef struct {
     int x, y;
 } Position;
@@ -41,12 +43,15 @@ typedef enum {
     MULTIPLAYER
 } GameMode;
 
+// Function to clear the screen
 void clear_screen() {
     printf("\033[H\033[J");
 }
 
+// Function to draw the game frame
 void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, int left_score, int right_score) {
     char screen[WIDTH][HEIGHT];
+
     // Initialize screen with empty characters
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
@@ -72,6 +77,11 @@ void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, int left_
         screen[ball->pos.x][ball->pos.y] = BALL_CHAR;
     }
 
+    // Draw center line
+    for (int y = 0; y < HEIGHT; y++) {
+        screen[WIDTH / 2][y] = CENTER_LINE_CHAR;
+    }
+
     // Draw scoreboard
     clear_screen(); // Clear the previous frame
     printf("Scoreboard: Player 1: %d  |  Player 2: %d\n", left_score, right_score);
@@ -83,11 +93,12 @@ void draw_frame(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, int left_
     }
 }
 
+// Function to draw the title screen
 void draw_title_screen(GameMode *mode) {
     clear_screen();
     printf("************************************************\n");
     printf("*                                              *\n");
-    printf("*                      GPONG                   *\n");
+    printf("*                       GPONG                  *\n");
     printf("*                                              *\n");
     printf("*        1. Single Player                      *\n");
     printf("*        2. Multiplayer                        *\n");
@@ -120,6 +131,7 @@ void draw_title_screen(GameMode *mode) {
     }
 }
 
+// Function to check if a key is pressed
 int kbhit() {
     struct termios oldt, newt;
     int ch;
@@ -140,6 +152,7 @@ int kbhit() {
     return 0;
 }
 
+// Function to update the game state
 void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, GameMode mode, int *left_score, int *right_score) {
     ball->pos.x += ball->dir.x;
     ball->pos.y += ball->dir.y;
@@ -213,26 +226,40 @@ void update_game(Ball *ball, Paddle *left_paddle, Paddle *right_paddle, GameMode
 
     // AI for right paddle in Single Player mode
     if (mode == SINGLE_PLAYER) {
+        int ai_speed = 1;
+
+        // Slow down AI if its score is high and the player's score is low
+        if (*right_score > 5 && *left_score < 5) {
+            ai_speed = 1; // Slow down AI
+        } else {
+            ai_speed = 2; // Normal AI speed
+        }
+
         if (ball->pos.y < right_paddle->pos.y) {
-            right_paddle->pos.y--;
+            right_paddle->pos.y -= ai_speed;
         } else if (ball->pos.y > right_paddle->pos.y + right_paddle->height - 1) {
-            right_paddle->pos.y++;
+            right_paddle->pos.y += ai_speed;
+        }
+
+        // Ensure AI paddle stays within the bounds
+        if (right_paddle->pos.y < 0) {
+            right_paddle->pos.y = 0;
+        } else if (right_paddle->pos.y > HEIGHT - right_paddle->height) {
+            right_paddle->pos.y = HEIGHT - right_paddle->height;
         }
     }
 }
 
 int main() {
     Ball ball = {{WIDTH / 2, HEIGHT / 2}, {1, 1}};
-    Paddle left_paddle = {{2, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
-    Paddle right_paddle = {{WIDTH - 3, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
+    Paddle left_paddle = {{1, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
+    Paddle right_paddle = {{WIDTH - 2, HEIGHT / 2 - PADDLE_HEIGHT / 2}, PADDLE_HEIGHT};
     GameMode mode;
     int left_score = 0;
     int right_score = 0;
 
-    // Show the title screen and get the game mode
     draw_title_screen(&mode);
 
-    // Main game loop
     while (1) {
         update_game(&ball, &left_paddle, &right_paddle, mode, &left_score, &right_score);
         draw_frame(&ball, &left_paddle, &right_paddle, left_score, right_score);
