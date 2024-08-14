@@ -4,7 +4,7 @@
  * 
  * Pong, ported to Goldspace.
  *
- * Copyright (C) Goldside543
+ * Copyright (C) 2024 Goldside543
  *
  */
 
