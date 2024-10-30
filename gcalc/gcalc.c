@@ -9,7 +9,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 
 void calculate(double a, double b, char op) {
     switch (op) {
