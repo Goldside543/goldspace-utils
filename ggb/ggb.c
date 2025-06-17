@@ -387,9 +387,9 @@ OpcodeFunc opcode_table[256] = {
 // Push PC to stack helper (little endian)
 void push_stack(CPU *cpu, uint16_t val) {
     cpu->sp--;
-    memory[cpu->sp] = (val >> 8) & 0xFF;
+    memory[cpu->sp] = val & 0xFF;       // low byte
     cpu->sp--;
-    memory[cpu->sp] = val & 0xFF;
+    memory[cpu->sp] = (val >> 8) & 0xFF; // high byte
 }
 
 // Simple interrupt handler (only VBLANK for demo)
